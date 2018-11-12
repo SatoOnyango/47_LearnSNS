@@ -14,7 +14,7 @@ $data = [$feed_id];
 $stmt = $dbh->prepare($sql);
 $stmt->execute($data);
 
-// 3. 
+// 3. timeline.phpに遷移
 
 header("Location: timeline.php");
 exit();
