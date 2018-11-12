@@ -16,6 +16,7 @@ $data = [$_SESSION['47_LearnSNS']['id']];
 $stmt = $dbh->prepare($sql);
 $stmt->execute($data);
 
+//ログインしているユーザーの情報
 $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // echo '<pre>';
@@ -144,8 +145,12 @@ while(true){
                             <span class="like-count">10</span>
                             <a href="#collapseComment" data-toggle="collapse" aria-expanded="false"><span>コメントする</span></a>
                             <span class="comment-count">コメント数：5</span>
-                            <a href="edit.php" class="btn btn-success btn-xs">編集</a>
-                            <a onclick="return confirm('ほんとに消すの？');" href="#" class="btn btn-danger btn-xs">削除</a>
+                            <!-- ログインしているユーザーだけ編集できるようにしたい -->
+                            <?php if($signin_user['id'] == $feed['user_id']): ?>
+                                <!-- //JOIN LEFT 使った時のと似てるなぁ〜 -->
+                                <a href="edit.php" class="btn btn-success btn-xs">編集</a>
+                                <a onclick="return confirm('ほんとに消すの？');" href="delete.php?feed_id=<?php echo $feed['id']; ?>" class="btn btn-danger btn-xs">削除</a>
+                            <?php endif;?>
                         </div>
                         <?php include('comment_view.php'); ?>
                     </div>
