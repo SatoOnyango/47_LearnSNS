@@ -10,6 +10,7 @@ $feed_id = $_GET['feed_id'];
 
 // 2. delete処理
 $sql = 'DELETE FROM `feeds` WHERE `id`=?';
+//WHERE文がないとfeeds文が全て消えてしまう。必ずWHERE文でカラムを指定する。
 $data = [$feed_id];
 $stmt = $dbh->prepare($sql);
 $stmt->execute($data);

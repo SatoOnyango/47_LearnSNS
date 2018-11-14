@@ -59,7 +59,7 @@ if(!empty($_POST)){
 }
 
 // 1.投稿情報(ユーザー情報を含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `created` DESC';
+$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC';
 //今までは$data = [$email];
 //sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
 
@@ -148,7 +148,7 @@ while(true){
                             <!-- ログインしているユーザーだけ編集できるようにしたい -->
                             <?php if($signin_user['id'] == $feed['user_id']): ?>
                                 <!-- //JOIN LEFT 使った時のと似てるなぁ〜 -->
-                                <a href="edit.php" class="btn btn-success btn-xs">編集</a>
+                                <a href="edit.php?feed_id=<?php echo $feed['id']; ?>" class="btn btn-success btn-xs">編集</a>
                                 <a onclick="return confirm('ほんとに消すの？');" href="delete.php?feed_id=<?php echo $feed['id']; ?>" class="btn btn-danger btn-xs">削除</a>
                             <?php endif;?>
                         </div>
