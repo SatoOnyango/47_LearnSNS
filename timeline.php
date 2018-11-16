@@ -2,6 +2,11 @@
 session_start();
 require('dbconnect.php');
 
+// 1ページあたりのページ表示件数
+const CONTENT_PER_PAGE = 5;
+//下の$page部分へ
+
+
 // ログインしてない状態でのアクセス禁止
 if(!isset($_SESSION['47_LearnSNS']['id']) ){
     header('Location: signin.php');
@@ -58,8 +63,43 @@ if(!empty($_POST)){
     }
 }
 
+//ページの指定がある場合
+//'page'のキーがあれば(GETで取って来れれば)、その値を取って来る
+if(isset($_GET['page'])){
+    $page = $_GET['page'];
+//ページの指定がない場合
+//なければ(ページの指定がない場合＝初期値)$pageにデフォルトで初期値を入れる
+}else{
+    $page = 1;
+}
+
+//constの次にここに来る
+// -1などの不正な値を渡された時の対策
+$page = max($page, 1);
+
+// feedsテーブルのレコードを取得する
+// COUNT() なんレコードあるか集計するSQL関数
+$sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
+//カラム名は連想配列のキーになる
+// `feeds`テーブルに何個レコードがあるか、その数を数える
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+//投稿(feed)の数が入っている
+$cnt = $result['cnt'];
+
+// 最後のページ数を取得
+// 最後のページ = 取得したページ数 ÷ 1ページあたりのページ数
+$last_page = ceil($cnt / CONTENT_PER_PAGE);
+
+echo '<pre>';
+var_dump($last_page);
+echo '</pre>';
+
+
 // 1.投稿情報(ユーザー情報を含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC';
+$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC LIMIT 5';
 //今までは$data = [$email];
 //sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
 
@@ -159,8 +199,8 @@ while(true){
                 <? endforeach ?>
                 <div aria-label="Page navigation">
                     <ul class="pager">
-                        <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Newer</a></li>
-                        <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+                        <li class="previous"><a href="timeline.php?page=<?php echo $page -1; ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+                        <li class="next"><a href="timeline.php?page=<?php echo $page +1; ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
                     </ul>
                 </div>
             </div>
