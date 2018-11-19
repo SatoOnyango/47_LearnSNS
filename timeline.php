@@ -2,6 +2,11 @@
 session_start();
 require('dbconnect.php');
 
+// 1ページあたりのページ表示件数
+const CONTENT_PER_PAGE = 5;
+//下の$page部分へ
+
+
 // ログインしてない状態でのアクセス禁止
 if(!isset($_SESSION['47_LearnSNS']['id']) ){
     header('Location: signin.php');
@@ -58,8 +63,58 @@ if(!empty($_POST)){
     }
 }
 
+//ページの指定がある場合
+//'page'のキーがあれば(GETで取って来れれば)、その値を取って来る
+if(isset($_GET['page'])){
+    $page = $_GET['page'];
+//ページの指定がない場合
+//なければ(ページの指定がない場合＝初期値)$pageにデフォルトで初期値を入れる
+}else{
+    $page = 1;
+}
+
+//constの次にここに来る
+// -1などの不正な値を渡された時の対策
+$page = max($page, 1);
+
+// feedsテーブルのレコードを取得する
+// COUNT() なんレコードあるか集計するSQL関数
+$sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
+//カラム名は連想配列のキーになる
+// `feeds`テーブルに何個レコードがあるか、その数を数える
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+//投稿(feed)の数が入っている
+$cnt = $result['cnt'];
+
+// 最後のページ数を取得
+// 最後のページ = 取得したページ数 ÷ 1ページあたりのページ数
+$last_page = ceil($cnt / CONTENT_PER_PAGE);
+
+// echo '<pre>';
+// var_dump($last_page);
+// echo '</pre>';
+
+//最後のページより大きい値を渡された際の対策
+//例、$page = 100 , $last_page = 3 のとき
+//実際にあるページは少ない方の３なので、そっちのページを表示するようにする
+$page = min($page, $last_page);
+
+//スキップするレコード = (指定ページ -1 ) * 表示件数
+$start = ($page -1) * CONTENT_PER_PAGE;
+//前のページまでに表示されたものは不要
+
+
+
 // 1.投稿情報(ユーザー情報を含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC';
+$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC LIMIT ' . CONTENT_PER_PAGE . ' OFFSET '. $start;
+
+//文字列結合
+//' OFFSET ? '  OFFSETの前後にスペース入れる（5(=CONTENT_PER_PAGE) OFFSET としたいから）
+//LIMIT 数字 OFFSET 数字
+
 //今までは$data = [$email];
 //sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
 
@@ -156,11 +211,23 @@ while(true){
                         <?php include('comment_view.php'); ?>
                     </div>
                 </div>
-                <? endforeach ?>
+                <? endforeach; ?>
                 <div aria-label="Page navigation">
                     <ul class="pager">
-                        <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Newer</a></li>
-                        <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+                        <!-- Newer押せないとき -->
+                        <!-- 最初にページより前は禁止 -->
+                        <?php if ($page == 1): ?>
+                            <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Newer</a></li>
+                        <?php else: ?>
+                        <!-- Newer押せるとき -->
+                            <li class="previous"><a href="timeline.php?page=<?php echo $page -1; ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+                        <?php endif; ?>
+
+                        <?php if ($page == $last_page): ?>
+                            <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+                        <?php else: ?>
+                            <li class="next"><a href="timeline.php?page=<?php echo $page +1; ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>

@@ -3,8 +3,9 @@ session_start();
 // 1. エラー内容を保持する配列変数を定義
 $errors = [];
 
-//セッションに保持している値をPOSTに擬似的に代入
+//確認画面から戻ってきた場合
 if(isset($_GET['action']) && $_GET['action'] == 'rewrite'){
+    //セッションに保持している値をPOSTに擬似的に代入
     $_POST['input_name'] = $_SESSION['47_LearnSNS']['name'];
     $_POST['input_email'] = $_SESSION['47_LearnSNS']['email'];
     $_POST['input_password'] = $_SESSION['47_LearnSNS']['password'];
