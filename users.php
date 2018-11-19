@@ -1,9 +1,37 @@
 <?php
+session_start();
+require('dbconnect.php');
+
+
+$sql = 'SELECT * FROM `users` WHERE `id` = ?';
+// $id = $_SESSION['47_LernSNS']['id'];
+// $data = $id;
+$data = [$_SESSION['47_LearnSNS']['id']];
+
+$stmt = $dbh->prepare($sql);
+$stmt->execute($data);
+
+//ログインしているユーザーの情報
+$signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+if($users)
+if(!empty($_GET)){
+    $user = $_GET['user'];
+    // 投稿の空チェック
+    if($users != ''){
+$sql = 'SELECT * FROM `users`WHERE (`name`,`email`,`img_name`,`created`)';
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+
+
 
 ?>
 <?php include('layouts/header.php'); ?>
 <body style="margin-top: 60px; background: #E4E6EB;">
     <?php include('navbar.php'); ?>
+    <?php foreach($users as $user): ?>
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
@@ -27,6 +55,7 @@
             </div>
         </div>
     </div>
+    <?php endforeach; ?>
 </body>
 <?php include('layouts/footer.php'); ?>
 </html>
