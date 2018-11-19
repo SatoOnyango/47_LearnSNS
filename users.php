@@ -15,15 +15,15 @@ $stmt->execute($data);
 $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
-if($users)
 if(!empty($_GET)){
     $user = $_GET['user'];
     // 投稿の空チェック
     if($users != ''){
-$sql = 'SELECT * FROM `users`WHERE (`name`,`email`,`img_name`,`created`)';
-$stmt = $dbh->prepare($sql);
-$stmt->execute();
-
+        $sql = 'SELECT * FROM `users` WHERE `name`';
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute();
+    }
+}
 
 
 
