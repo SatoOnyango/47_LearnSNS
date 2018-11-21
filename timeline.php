@@ -106,8 +106,37 @@ $page = min($page, $last_page);
 $start = ($page -1) * CONTENT_PER_PAGE;
 //前のページまでに表示されたものは不要
 
+if (isset($_GET['search_word'])){
+    // (echo '検索が行われた';)
+    // 検索を行った場合の遷移
+    $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name`
+            FROM `feeds` AS `f` LEFT JOIN `users` AS `u`
+            ON `f`.`user_id` = `u`.`id`
+            WHERE `f`.`feed` LIKE "%"?"%"
+            ORDER BY `f`.`created` DESC LIMIT '. CONTENT_PER_PAGE . ' OFFSET '. $start;
 
+    $data = [$_GET['search_word']];
+    
+    // $stmt = $dbh->prepare($sql);
+    // $stmt->execute($data);
 
+    // // 投稿情報全てを入れる配列定義
+    // $feeds = [];
+    // while(true){
+    //     $record = $stmt->fetch(PDO::FETCH_ASSOC);
+    //     //fetchは一つの行を取り出すこと
+    //     if($record == false){
+    //         break;
+    //     }
+    // $feeds[] = $record;
+    // }
+
+    // echo '<pre>';
+    // var_dump($feeds);
+    // echo '</pre>';
+
+} else{
+    // その他の遷移
 // 1.投稿情報(ユーザー情報を含む)を全て取得
 $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id` = `u`. `id` ORDER BY `f`.`created` DESC LIMIT ' . CONTENT_PER_PAGE . ' OFFSET '. $start;
 
@@ -117,9 +146,14 @@ $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `use
 
 //今までは$data = [$email];
 //sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
+    $data = [];
+}
+
 
 $stmt = $dbh->prepare($sql);
-$stmt->execute();
+// $stmt->execute();
+$stmt->execute($data);
+
 
 // 投稿情報全てを入れる配列定義
 $feeds = [];
@@ -186,7 +220,7 @@ while(true){
                         <div class="col-xs-11">
                             <a href="profile.php" style="color: #7f7f7f;">
                                 <?php echo ($feed['name']);?></a>
-                            2018-10-14
+                            <?php echo $feed['created']; ?>
                         </div>
                     </div>
                     <div class="row feed_content">

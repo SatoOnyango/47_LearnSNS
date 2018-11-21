@@ -14,20 +14,32 @@ $stmt->execute($data);
 //ログインしているユーザーの情報
 $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$sql = 'SELECT `name`,`img_name`,`created` FROM `users`';
 
-if(!empty($_GET)){
-    $user = $_GET['user'];
-    // 投稿の空チェック
-    if($users != ''){
-        $sql = 'SELECT * FROM `users` WHERE `name`';
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute();
+
+//今までは$data = [$email];
+//sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
+
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+// 投稿情報全てを入れる配列定義
+$users = [];
+while(true){
+    $record = $stmt->fetch(PDO::FETCH_ASSOC);
+    //fetchは一つの行を取り出すこと
+    if($record == false){
+        break;
     }
+    $users[] = $record;
 }
 
 
 
+
+
 ?>
+
 <?php include('layouts/header.php'); ?>
 <body style="margin-top: 60px; background: #E4E6EB;">
     <?php include('navbar.php'); ?>
@@ -38,12 +50,12 @@ if(!empty($_GET)){
                 <div class="thumbnail">
                     <div class="row">
                         <div class="col-xs-2">
-                            <img src="user_profile_img/misae.png" width="80px">
+                            <img src="user_profile_img/<?php echo $user['img_name']; ?>" width="80px">
                         </div>
                         <div class="col-xs-10">
-                            名前 <a href="profile.php" style="color: #7f7f7f;">野原みさえ</a>
+                            名前 <a href="profile.php" style="color: #7f7f7f;"><?php echo $user['name']; ?></a>
                             <br>
-                            2018-10-14 12:34:56からメンバー
+                            <?php echo $user['created']; ?>からメンバー
                         </div>
                     </div>
                     <div class="row feed_sub">
