@@ -25,6 +25,7 @@ $email = $_SESSION['47_LearnSNS']['email'];
 $password = $_SESSION['47_LearnSNS']['password'];
 $img_name = $_SESSION['47_LearnSNS']['img_name'];
 
+
 // POST送信の時（登録ボタンが押された時のみ処理するif文）
 if(!empty($_POST)){
     // echo 'POST送信されました';

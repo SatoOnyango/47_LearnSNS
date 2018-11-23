@@ -146,6 +146,8 @@ $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds`AS `f` LEFT JOIN `use
 
 //今までは$data = [$email];
 //sqlの中に？がないので変数で指定する必要がないいから$dataは使わない
+
+ //
     $data = [];
 }
 
@@ -160,9 +162,51 @@ $feeds = [];
 while(true){
     $record = $stmt->fetch(PDO::FETCH_ASSOC);
     //fetchは一つの行を取り出すこと
+    // $record は要するにfeed一件の情報
     if($record == false){
+        // レコードが取れなくなったらループを抜ける
         break;
     }
+
+    // 各投稿ごとのコメント一覧を取得
+    $comment_sql = 'SELECT `c`.*,`u`.`name`,`u`.`img_name` FROM `comments` AS `c`
+                    LEFT JOIN `users` AS `u`
+                    ON `c`.`user_id` = `u`.`id`
+                    WHERE `c`.`feed_id` = ?';
+
+    $comment_data = [$record['id']];
+    $comment_stmt = $dbh->prepare($comment_sql);
+    $comment_stmt->execute($comment_data);
+
+    $comments = [];
+    while(true){
+        $comment = $comment_stmt->fetch(PDO::FETCH_ASSOC);
+        if($comment == false){
+            break;
+        }
+        $comments[] = $comment;
+    }
+
+//投稿の連想配列に新しくcommentsというキーを追加
+$record['comments'] = $comments;
+
+// echo '<pre>';
+// var_dump($record);
+// echo '</pre>';
+
+//各コメントに対するコメント数を取得
+$comment_cnt_sql = 'SELECT COUNT(*) AS `comment_cnt`
+                    FROM `comments` WHERE `feed_id` = ?';
+$comment_cnt_data = [$record['id']];
+$comment_cnt_stmt = $dbh->prepare($comment_cnt_sql);
+$comment_cnt_stmt->execute($comment_cnt_data);
+
+$comment_cnt_result = $comment_cnt_stmt->fetch(PDO::FETCH_ASSOC);
+
+// 投稿の連想配列に新しく comment_cnt というキーを追加
+$record['comment_cnt'] = $comment_cnt_result['comment_cnt'];
+
+
     $feeds[] = $record;
 }
 
@@ -173,8 +217,6 @@ while(true){
 // 宿題 8/Nov/2018
 // $feedsをもとにHTML内に
 // 投稿内容、投稿日時、ユーザー名、ユーザー画像を表示
-
-
 
 
 
@@ -233,8 +275,9 @@ while(true){
                             <button class="btn btn-default">いいね！</button>
                             いいね数：
                             <span class="like-count">10</span>
-                            <a href="#collapseComment" data-toggle="collapse" aria-expanded="false"><span>コメントする</span></a>
-                            <span class="comment-count">コメント数：5</span>
+                            <a href="#collapseComment<?php echo $feed['id']; ?>" data-toggle="collapse" aria-expanded="false"><span>コメントする</span></a>
+                            <!-- トグルオープンするのはbootstropの機能 -->
+                            <span class="comment-count">コメント数：<?php echo $feed['comment_cnt']; ?></span>
                             <!-- ログインしているユーザーだけ編集できるようにしたい -->
                             <?php if($signin_user['id'] == $feed['user_id']): ?>
                                 <!-- //JOIN LEFT 使った時のと似てるなぁ〜 -->

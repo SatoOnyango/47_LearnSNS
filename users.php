@@ -50,7 +50,7 @@ while(true){
                 <div class="thumbnail">
                     <div class="row">
                         <div class="col-xs-2">
-                            <img src="user_profile_img/<?php echo $user['img_name']; ?>" width="80px">
+                            <img src="user_profile_img/<?php echo $signin_user['img_name']; ?>" width="80px">
                         </div>
                         <div class="col-xs-10">
                             名前 <a href="profile.php" style="color: #7f7f7f;"><?php echo $user['name']; ?></a>
